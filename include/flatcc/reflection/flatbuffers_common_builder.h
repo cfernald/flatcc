@@ -416,7 +416,7 @@ static inline int N ## _pick(NS ## builder_t *B, TT ## _table_t t)\
 static inline int N ## _add(NS ## builder_t *B, TN ## _union_ref_t uref)\
 { NS ## ref_t *_p; TN ## _union_type_t *_pt; if (uref.type == TN ## _NONE) return 0; if (uref.value == 0) return -1;\
   if (!(_pt = (TN ## _union_type_t *)flatcc_builder_table_add(B, ID - 1, sizeof(*_pt), sizeof(*_pt)))) return -1;\
-  *_pt = uref.type; if (!(_p = flatcc_builder_table_add_offset(B, ID))) return -1; *_p = uref.value; return 0; }\
+  *_pt = uref.type; if ((_p = flatcc_builder_table_add_offset(B, ID)) == 0) return -1; *_p = uref.value; return 0; }\
 static inline int N ## _add_type(NS ## builder_t *B, TN ## _union_type_t type)\
 { TN ## _union_type_t *_pt; if (type == TN ## _NONE) return 0; return (_pt = (TN ## _union_type_t *)flatcc_builder_table_add(B, ID - 1,\
   sizeof(*_pt), sizeof(*_pt))) ? ((*_pt = type), 0) : -1; }\
@@ -471,10 +471,10 @@ __flatbuffers_build_string_field_ops(NS, N ## _ ## M)
  * S: sizeof of scalar type, A: alignment of type T, default value V of type T. */
 #define __flatbuffers_build_scalar_field(ID, NS, N, TN, T, S, A, V, TT)\
 static inline int N ## _add(NS ## builder_t *B, const T v)\
-{ T *_p; if (v == V) return 0; if (!(_p = (T *)flatcc_builder_table_add(B, ID, S, A))) return -1;\
+{ T *_p; if (v == V) return 0; if ((_p = (T *)flatcc_builder_table_add(B, ID, S, A)) == 0) return -1;\
   TN ## _assign_to_pe(_p, v); return 0; }\
 static inline int N ## _force_add(NS ## builder_t *B, const T v)\
-{ T *_p; if (!(_p = (T *)flatcc_builder_table_add(B, ID, S, A))) return -1;\
+{ T *_p; if ((_p = (T *)flatcc_builder_table_add(B, ID, S, A)) == 0) return -1;\
   TN ## _assign_to_pe(_p, v); return 0; }\
 /* Clone does not skip default values and expects pe endian content. */\
 static inline int N ## _clone(NS ## builder_t *B, const T *p)\
@@ -487,7 +487,7 @@ static inline int N ## _pick(NS ## builder_t *B, TT ## _table_t t)\
  * S: sizeof of scalar type, A: alignment of type T. */
 #define __flatbuffers_build_scalar_optional_field(ID, NS, N, TN, T, S, A, TT)\
 static inline int N ## _add(NS ## builder_t *B, const T v)\
-{ T *_p; if (!(_p = (T *)flatcc_builder_table_add(B, ID, S, A))) return -1;\
+{ T *_p; if ((_p = (T *)flatcc_builder_table_add(B, ID, S, A)) == 0) return -1;\
   TN ## _assign_to_pe(_p, v); return 0; }\
 /* Clone does not skip default values and expects pe endian content. */\
 static inline int N ## _clone(NS ## builder_t *B, const T *p)\
@@ -580,8 +580,8 @@ __flatbuffers_build_table_vector_ops(NS, N, TN)
 #define __flatbuffers_build_union_vector_field(ID, NS, N, TN, TT)\
 static inline int N ## _add(NS ## builder_t *B, TN ## _union_vec_ref_t uvref)\
 { NS ## vec_ref_t *_p; if (!uvref.type || !uvref.value) return uvref.type == uvref.value ? 0 : -1;\
-  if (!(_p = flatcc_builder_table_add_offset(B, ID - 1))) return -1; *_p = uvref.type;\
-  if (!(_p = flatcc_builder_table_add_offset(B, ID))) return -1; *_p = uvref.value; return 0; }\
+  if ((_p = flatcc_builder_table_add_offset(B, ID - 1)) == 0) return -1; *_p = uvref.type;\
+  if ((_p = flatcc_builder_table_add_offset(B, ID)) == 0) return -1; *_p = uvref.value; return 0; }\
 static inline int N ## _start(NS ## builder_t *B)\
 { return flatcc_builder_start_union_vector(B); }\
 static inline int N ## _end(NS ## builder_t *B)\
